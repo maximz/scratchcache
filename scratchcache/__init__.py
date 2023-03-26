@@ -18,7 +18,7 @@ logger.addHandler(logging.NullHandler())
 
 def local_machine_cache(
     fname: Union[str, Path], local_machine_cache_dir: Union[str, Path]
-):
+) -> Path:
     """Local disk read cache for network drive files.
     Replace a network drive filename with a local cached version if it exists.
     Create or update local cached version as needed.

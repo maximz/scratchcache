@@ -1,4 +1,4 @@
-# Scratch Cache
+# Scratch Cache (WIP)
 
 [![](https://img.shields.io/pypi/v/scratchcache.svg)](https://pypi.python.org/pypi/scratchcache)
 [![CI](https://github.com/maximz/scratchcache/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/maximz/scratchcache/actions/workflows/ci.yaml)

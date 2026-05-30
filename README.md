@@ -1,5 +1,10 @@
 # scratchcache
 
+[![](https://img.shields.io/pypi/v/scratchcache.svg)](https://pypi.python.org/pypi/scratchcache)
+[![CI](https://github.com/maximz/scratchcache/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/maximz/scratchcache/actions/workflows/ci.yaml)
+[![](https://img.shields.io/badge/docs-here-blue.svg)](https://scratchcache.maximz.com)
+[![](https://img.shields.io/github/stars/maximz/scratchcache?style=social)](https://github.com/maximz/scratchcache)
+
 `scratchcache` provides a small local read-through cache for files that are
 expensive to read directly, such as files stored on a network drive.
 

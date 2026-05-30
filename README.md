@@ -1,19 +1,35 @@
-# Scratch Cache (WIP)
+# scratchcache
 
-[![](https://img.shields.io/pypi/v/scratchcache.svg)](https://pypi.python.org/pypi/scratchcache)
-[![CI](https://github.com/maximz/scratchcache/actions/workflows/ci.yaml/badge.svg?branch=master)](https://github.com/maximz/scratchcache/actions/workflows/ci.yaml)
-[![](https://img.shields.io/badge/docs-here-blue.svg)](https://scratchcache.maximz.com)
-[![](https://img.shields.io/github/stars/maximz/scratchcache?style=social)](https://github.com/maximz/scratchcache)
+`scratchcache` provides a small local read-through cache for files that are
+expensive to read directly, such as files stored on a network drive.
 
-## TODOs: Configuring this template
+The package currently exposes one helper, `local_machine_cache`, which takes a
+source file path and a local cache directory. It returns a path to a local copy
+that can be passed to normal file-reading code.
 
-Create a Netlify site for your repository, then turn off automatic builds in Netlify settings.
+## Why It Exists
 
-Add these CI secrets: `PYPI_API_TOKEN`, `NETLIFY_AUTH_TOKEN` (Netlify user settings - personal access tokens), `DEV_NETLIFY_SITE_ID`, `PROD_NETLIFY_SITE_ID` (API ID from Netlify site settings)
+Some libraries repeatedly read the same input file and perform poorly when that
+file lives on slower remote storage. `scratchcache` lets callers keep their
+source-of-truth path unchanged while reading from a machine-local copy whenever
+the cached copy is current.
 
-Set up Codecov at TODO
+The cache is for reads only. Do not write through the returned path.
 
-## Overview
+## How It Works
+
+`local_machine_cache(fname, local_machine_cache_dir)`:
+
+- verifies that `fname` exists, otherwise raises `FileNotFoundError`
+- hashes the source path to choose a stable cache filename
+- preserves the source file's full extension chain, such as `.tar.gz`
+- creates the cache directory if needed
+- copies the source file with `shutil.copy2` when the cache file is missing or
+  its modification time differs from the source
+- returns the cached local `pathlib.Path`
+
+Freshness is based on exact modification-time equality between the source file
+and the cached copy.
 
 ## Installation
 
@@ -21,31 +37,37 @@ Set up Codecov at TODO
 pip install scratchcache
 ```
 
+The package supports Python 3.8 and newer and has no runtime dependencies.
+
 ## Usage
+
+```python
+from pathlib import Path
+
+from scratchcache import local_machine_cache
+
+source = Path("/Volumes/shared/data/example.csv")
+cache_dir = Path("/tmp/scratchcache")
+
+local_path = local_machine_cache(source, cache_dir)
+
+with local_path.open() as f:
+    rows = f.readlines()
+```
+
+Use the returned path for reading. If the original file changes later and its
+modification time no longer matches the cached copy, the next call refreshes the
+cache.
 
 ## Development
 
-Submit PRs against `develop` branch, then make a release pull request to `master`.
-
 ```bash
-# Install requirements
-pip install --upgrade pip wheel
 pip install -r requirements_dev.txt
-
-# Install local package
 pip install -e .
-
-# Install pre-commit
-pre-commit install
-
-# Run tests
 make test
-
-# Run lint
 make lint
-
-# bump version before submitting a PR against master (all master commits are deployed)
-bump2version patch # possible: major / minor / patch
-
-# also ensure CHANGELOG.md updated
+make docs
 ```
+
+The test suite is configured with `pytest`; docs are built with Sphinx. Releases
+are versioned in both `setup.py` and `scratchcache/__init__.py`.
